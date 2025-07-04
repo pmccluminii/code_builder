@@ -41,20 +41,18 @@ def add_styling():
             color: white !important;
             font-weight: 600;
         }
-        div[role="radiogroup"] label > div:first-child {
+        div[role="radiogroup"] > label > div:first-child {
             display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
         }
         div[role="radiogroup"] label {
             margin-right: 0 !important;
             user-select: none;
         }
-            label[data-testid] {
-  margin: 0 !important;
-  padding: 0 !important;
-  display: none !important;
-                height: 1px !important;
-                line-height: 1px !important;
-}    
     </style>
     """, unsafe_allow_html=True)
 
@@ -87,9 +85,8 @@ if product_selection:
         code_to_label = dict(options)
         default_label = code_to_label.get(default_code, opt_labels[0])
 
-        # Fix invalid or missing label in session state
-        stored_label = st.session_state.get(radio_key, None)
-        if stored_label not in opt_labels:
+        # Only set if key missing or invalid to avoid Streamlit warning
+        if radio_key not in st.session_state or st.session_state[radio_key] not in opt_labels:
             st.session_state[radio_key] = default_label
 
     # Render radios and collect selected labels
@@ -109,8 +106,6 @@ if product_selection:
             horizontal=True,
         )
 
-        # Let Streamlit handle updating st.session_state[radio_key]
-
     # Sync sku_choice from radios' selected labels
     for element, options in sku_elements:
         radio_key = f"radio_{element}"
@@ -124,4 +119,5 @@ if product_selection:
         st.markdown("<h4 style='margin-bottom: 0rem;'>Current Part Code:</h4>", unsafe_allow_html=True)
         parts = [st.session_state.sku_choice.get(el, "--") for el in sku_order]
         full_code = "-".join([model_code if sku_order[0] != "Model" else ""] + parts).strip("-")
-        st.code(full_code, line_numbers=False)
+        st.code(full_code, language=None)
+
